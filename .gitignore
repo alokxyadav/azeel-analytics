@@ -1,0 +1,48 @@
+node_modules
+.next
+venv
+__pycache__
+*.db
+*.db-wal
+*.db-shm
+.env
+.env.local
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Environment secrets
+.env.*
+!.env.example
+!.env.local.example
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.local.example
+
+# Dependencies and build output
+node_modules/
+.next/
+dist/
+build/
+venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+coverage/
+*.tsbuildinfo
+
+# Logs and test output
+*.log
+test-results/
+playwright-report/
+
+# Credentials and private keys
+*.pem
+*.key
+*.p12
+*-service-account.json
+credentials.json
+id_rsa
+
+# OS files
+.DS_Store

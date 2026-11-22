@@ -1,0 +1,15 @@
+line-length = 140
+target-version = "py312"
+extend-exclude = ["migrations/versions"]
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "C4", "SIM"]
+ignore = [
+  "B008",  # FastAPI uses Depends()/Query() in argument defaults by design
+  "S101",  # assert is fine in tests
+  "S105", "S106",  # false positives on token/password variable names
+]
+
+[lint.per-file-ignores]
+"tests/*" = ["S", "E501", "E702", "SIM"]
+"app/scripts/*" = ["S608"]

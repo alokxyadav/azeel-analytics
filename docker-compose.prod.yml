@@ -1,0 +1,59 @@
+# Public deployment: Caddy terminates HTTPS (automatic Let's Encrypt certificates) and is the only
+# service that publishes ports. Run with:  docker compose -f docker-compose.prod.yml up -d --build
+services:
+  caddy:
+    image: caddy:2-alpine
+    ports: ["80:80", "443:443"]
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?}
+      API_DOMAIN: ${API_DOMAIN:?}
+      ACME_EMAIL: ${ACME_EMAIL:?}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on: [backend, frontend]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    # Only rate-limit counters live here, so no persistence is needed.
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "64mb", "--maxmemory-policy", "allkeys-lru"]
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    depends_on: [redis]
+    environment:
+      ENV: production
+      REDIS_URL: redis://redis:6379/0
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env}
+      FRONTEND_URL: ${SITE_URL:?Set SITE_URL to your https app URL}
+      FORWARDED_ALLOW_IPS: "*"    # safe here: only Caddy can reach the backend (no published ports)
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_SSL: ${SMTP_SSL:-false}
+      MAIL_FROM: ${MAIL_FROM:?Set MAIL_FROM}
+      CONTACT_RECIPIENT: ${CONTACT_RECIPIENT:-}
+      REQUIRE_EMAIL_VERIFICATION: ${REQUIRE_EMAIL_VERIFICATION:-auto}
+    volumes: ["azeel-data:/data"]
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${API_URL:?Set API_URL to your https API URL}
+        NEXT_PUBLIC_SITE_URL: ${SITE_URL:?}
+        NEXT_PUBLIC_CONTACT_EMAIL: ${CONTACT_EMAIL:-hello@azeel.tech}
+    depends_on:
+      backend: { condition: service_healthy }
+    restart: unless-stopped
+
+volumes:
+  azeel-data:
+  caddy-data:
+  caddy-config:

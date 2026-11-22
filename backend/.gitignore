@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+azeel.db
+uploads/*
+!uploads/.gitkeep
+.env

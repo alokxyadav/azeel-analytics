@@ -1,0 +1,17 @@
+{
+	email {$ACME_EMAIL}
+}
+
+{$APP_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy frontend:3000
+}
+
+{$API_DOMAIN} {
+	encode zstd gzip
+	# Reject oversized bodies at the edge (the API also enforces its own 100 MB limit)
+	request_body {
+		max_size 105MB
+	}
+	reverse_proxy backend:8000
+}
