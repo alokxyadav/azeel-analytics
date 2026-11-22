@@ -38,7 +38,7 @@
     "axe-core": "^4.14.0",
     "eslint": "^9",
     "eslint-config-next": "16.4.2",
-    "jsdom": "^26.1.0",
+    "jsdom": "^31.0.1",
     "puppeteer-core": "^25.16.0",
     "tailwindcss": "^4",
     "typescript": "^5",
